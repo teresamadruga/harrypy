@@ -11,7 +11,7 @@ class BoundingBox:
     def __init__(
         self, x_top_left: float, y_top_left: float,
         x_bottom_right: float, y_bottom_right: float,
-        image_w: int, image_h: int
+        image_width: int, image_height: int
     ):
         """
         Construct a new BoundingBox instance.
@@ -20,20 +20,20 @@ class BoundingBox:
         :param y_top_left: the y-coordinate of the top-left corner.
         :param x_bottom_right: the x-coordinate of the bottom-right corner.
         :param y_bottom_right: the y-coordinate of the bottom-right corner.
-        :param image_w: the width of the image in pixels.
-        :param image_h: the height of the image in pixels.
+        :param image_width: the width of the image in pixels.
+        :param image_height: the height of the image in pixels.
         """
         if not all(
             isinstance(x, (int, 
                            float)) for x in [x_top_left, y_top_left,
                                              x_bottom_right, y_bottom_right,
-                                             image_w, image_h]
+                                             image_width, image_height]
         ):
             raise TypeError(
                 "Bounding box coordinates and image dimensions must be numeric"
             )
-        if not (0 <= x_top_left < x_bottom_right <= image_w 
-                and 0 <= y_top_left < y_bottom_right <= image_h):
+        if not (0 <= x_top_left < x_bottom_right <= image_width 
+                and 0 <= y_top_left < y_bottom_right <= image_height):
             raise ValueError(
                 "Bounding box coordinates must be within image dimensions."
             )
@@ -43,10 +43,12 @@ class BoundingBox:
         self._size = np.array([x_bottom_right - x_top_left,
                                y_bottom_right - y_top_left],
                               dtype=float)
-        self._area = np.array([self._size[0] * self._size[1]], dtype=float)
+        self._area = np.array([self._size[0] * self._size[1]],
+                              dtype=float)
         self._aspect_ratio = np.array([self._size[1] / self._size[0]],
                                       dtype=float)
-        self._image_dim = np.array([image_w, image_h], dtype=float)
+        self._image_dim = np.array([image_width, image_height],
+                                   dtype=float)
         self.probs, self._label, self.label_format = None, None, None
 
     @property
@@ -156,11 +158,15 @@ class BoundingBox:
         by the image dimensions to be between 0 and 1 => normalized.
         """
         xyxy = self.xyxy()
-        x0 = xyxy[0] / self._image_dim[0]
-        y0 = xyxy[1] / self._image_dim[1]
-        x1 = xyxy[2] / self._image_dim[0]
-        y1 = xyxy[3] / self._image_dim[1]
-        return np.array([x0, y0, x1, y1], dtype=float)
+
+        x_top_left = xyxy[0] / self._image_dim[0]
+        y_top_left = xyxy[1] / self._image_dim[1]
+        x_bottom_right = xyxy[2] / self._image_dim[0]
+        y_bottom_right = xyxy[3] / self._image_dim[1]
+
+        return np.array([x_top_left, y_top_left,
+                         x_bottom_right, y_bottom_right],
+                        dtype=float)
 
     def xywhn(self):
         """
@@ -171,11 +177,15 @@ class BoundingBox:
         to be between 0 and 1 => normalized.
         """
         xywh = self.xywh()
-        x = xywh[0] / self._image_dim[0]
-        y = xywh[1] / self._image_dim[1]
-        w = xywh[2] / self._image_dim[0]
-        h = xywh[3] / self._image_dim[1]
-        return np.array([x, y, w, h], dtype=float)
+
+        x_top_left = xywh[0] / self._image_dim[0]
+        y_top_left = xywh[1] / self._image_dim[1]
+        width = xywh[2] / self._image_dim[0]
+        height = xywh[3] / self._image_dim[1]
+
+        return np.array([x_top_left, y_top_left,
+                         width, height],
+                        dtype=float)
 
     def cxcywhn(self):
         """
@@ -186,11 +196,14 @@ class BoundingBox:
         the image dimensions to be between 0 and 1 => normalized.
         """
         cxcywh = self.cxcywh()
-        cx = cxcywh[0] / self._image_dim[0]
-        cy = cxcywh[1] / self._image_dim[1]
-        w = cxcywh[2] / self._image_dim[0]
-        h = cxcywh[3] / self._image_dim[1]
-        return np.array([cx, cy, w, h], dtype=float)
+
+        center_x = cxcywh[0] / self._image_dim[0]
+        center_y = cxcywh[1] / self._image_dim[1]
+        width = cxcywh[2] / self._image_dim[0]
+        height = cxcywh[3] / self._image_dim[1]
+
+        return np.array([center_x, center_y, width, height],
+                         dtype=float)
 
     def coco_format(self):
         """
