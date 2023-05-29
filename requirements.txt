@@ -1,1 +1,11 @@
 numpy
+
+
+black
+isort
+flake8
+mypy
+coverage
+
+
+pytest
