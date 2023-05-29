@@ -20,7 +20,7 @@ jobs:
         with:
           environment-file: conda-environment.yml
           environment-name: harrypy
-          cache-env: true
+          cache-environment: true
           cache-downloads: true
           
       - run: |
