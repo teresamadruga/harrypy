@@ -4,36 +4,48 @@ import numpy as np
 class BoundingBox:
     """
     A bounding box defined by its top-left and bottom-right coordinates,
-    relative to an image with a given width and height.
+    relative to an image with a given width and height. The Bounding Box 
+    format is xyxy. The Pascal VOC database uses this format.
     """
 
     def __init__(
-        self, x0: float, y0: float, x1: float, y1: float, image_w: int, image_h: int
+        self, x_top_left: float, y_top_left: float,
+        x_bottom_right: float, y_bottom_right: float,
+        image_w: int, image_h: int
     ):
         """
         Construct a new BoundingBox instance.
 
-        :param x0: the x-coordinate of the top-left corner.
-        :param y0: the y-coordinate of the top-left corner.
-        :param x1: the x-coordinate of the bottom-right corner.
-        :param y1: the y-coordinate of the bottom-right corner.
+        :param x_top_left: the x-coordinate of the top-left corner.
+        :param y_top_left: the y-coordinate of the top-left corner.
+        :param x_bottom_right: the x-coordinate of the bottom-right corner.
+        :param y_bottom_right: the y-coordinate of the bottom-right corner.
         :param image_w: the width of the image in pixels.
         :param image_h: the height of the image in pixels.
         """
         if not all(
-            isinstance(x, (int, float)) for x in [x0, y0, x1, y1, image_w, image_h]
+            isinstance(x, (int, 
+                           float)) for x in [x_top_left, y_top_left,
+                                             x_bottom_right, y_bottom_right,
+                                             image_w, image_h]
         ):
             raise TypeError(
                 "Bounding box coordinates and image dimensions must be numeric"
             )
-        if not (0 <= x0 < x1 <= image_w and 0 <= y0 < y1 <= image_h):
+        if not (0 <= x_top_left < x_bottom_right <= image_w 
+                and 0 <= y_top_left < y_bottom_right <= image_h):
             raise ValueError(
                 "Bounding box coordinates must be within image dimensions."
             )
-        self._bbox = np.array([x0, y0, x1, y1], dtype=float)
-        self._size = np.array([x1 - x0, y1 - y0], dtype=float)
+        self._bbox = np.array([x_top_left, y_top_left,
+                               x_bottom_right, y_bottom_right],
+                              dtype=float)
+        self._size = np.array([x_bottom_right - x_top_left,
+                               y_bottom_right - y_top_left],
+                              dtype=float)
         self._area = np.array([self._size[0] * self._size[1]], dtype=float)
-        self._aspect_ratio = np.array([self._size[1] / self._size[0]], dtype=float)
+        self._aspect_ratio = np.array([self._size[1] / self._size[0]],
+                                      dtype=float)
         self._image_dim = np.array([image_w, image_h], dtype=float)
         self.probs, self._label, self.label_format = None, None, None
 
